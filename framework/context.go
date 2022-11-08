@@ -16,7 +16,8 @@ type Context struct {
 	request        *http.Request
 	responseWriter http.ResponseWriter
 	ctx            context.Context
-	handler        ControllerHandler
+	handlers       []ControllerHandler
+	index          int // handlers中的下标
 
 	//超时标记
 	hasTimeout bool
@@ -30,6 +31,7 @@ func NewContext(r *http.Request, w http.ResponseWriter) *Context {
 		responseWriter: w,
 		ctx:            r.Context(),
 		writerMux:      &sync.Mutex{},
+		index:          -1,
 	}
 }
 
@@ -51,6 +53,10 @@ func (ctx *Context) SetHasTimeOut() {
 
 func (ctx *Context) HasTimeout() bool {
 	return ctx.hasTimeout
+}
+
+func (ctx *Context) SetHandlers(handlers []ControllerHandler) {
+	ctx.handlers = handlers
 }
 
 func (ctx *Context) BaseContext() context.Context {
@@ -214,5 +220,20 @@ func (ctx *Context) HTML(status int, obj interface{}, template string) error {
 }
 
 func (ctx *Context) Text(status int, obj string) error {
+	return nil
+}
+
+/*
+* 执行下一个ControllerHandler 执行时机：
+* 一，在ServeHttp 入口处
+* 二，在每个中间件中需要调用
+ */
+func (ctx *Context) Next() error {
+	ctx.index++
+	if ctx.index < len(ctx.handlers) {
+		if err := ctx.handlers[ctx.index](ctx); err != nil {
+			return err
+		}
+	}
 	return nil
 }

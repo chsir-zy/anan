@@ -48,7 +48,16 @@ func FooControllerHandler(c *framework.Context) error {
 }
 
 func UserControllerHandler(c *framework.Context) error {
+	fmt.Println("UserControllerHandler")
+	time.Sleep(5 * time.Second)
 	c.Json(200, "UserControllerHandler")
+	return nil
+}
+
+func SubjectSubGetControllerHandler(c *framework.Context) error {
+	fmt.Println("SubjectSubGetControllerHandler")
+	time.Sleep(3 * time.Second)
+	c.Json(200, "SubjectSubGetControllerHandler")
 	return nil
 }
 
@@ -62,12 +71,10 @@ func SubjectPutControllerHandler(c *framework.Context) error {
 }
 func SubjectPostControllerHandler(c *framework.Context) error {
 	c.Json(200, "SubjectPostControllerHandler")
+	c.Next()
 	return nil
 }
-func SubjectSubGetControllerHandler(c *framework.Context) error {
-	c.Json(200, "SubjectSubGetControllerHandler")
-	return nil
-}
+
 func SubjectSubInfoGetControllerHandler(c *framework.Context) error {
 	c.Json(200, "SubjectSubInfoGetControllerHandler")
 	return nil
