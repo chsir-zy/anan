@@ -57,16 +57,26 @@ func (c *Core) Group(prefix string) IGroup {
 	return NewGroup(c, prefix)
 }
 
-func (c *Core) FindRouteByRequest(request *http.Request) []ControllerHandler {
+func (c *Core) FindHandlersByRequest(request *http.Request) []ControllerHandler {
 	method := request.Method
 	uri := request.URL.Path
 	upMethod := strings.ToUpper(method)
-	upUri := strings.ToUpper(uri)
+	// upUri := strings.ToUpper(uri)
 
 	if methodHandler, ok := c.router[upMethod]; ok {
-		return methodHandler.FindControllerHandler(upUri)
+		return methodHandler.FindControllerHandler(uri)
 	}
 
+	return nil
+}
+
+func (c *Core) FindRouteNodeByRequest(request *http.Request) *node {
+	method := request.Method
+	uri := request.URL.Path
+	upMethod := strings.ToUpper(method)
+	if methodHandler, ok := c.router[upMethod]; ok {
+		return methodHandler.root.matchNode(uri)
+	}
 	return nil
 }
 
@@ -74,16 +84,20 @@ func (c *Core) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 	log.Println("core.serveHTTP")
 	ctx := NewContext(request, response)
 
-	handlers := c.FindRouteByRequest(request)
+	handlers := c.FindHandlersByRequest(request)
 	if handlers == nil {
-		ctx.Json(404, "router not found")
+		ctx.Json("handlers not found")
 		return
 	}
-	// err1 := SubjectGetControllerHandler(ctx)
-
 	ctx.SetHandlers(handlers)
+
+	//设置路由参数
+	node := c.FindRouteNodeByRequest(request)
+	params := node.parseParamsFromEndNode(request.URL.Path)
+	ctx.SetParams(params)
+
 	if err := ctx.Next(); err != nil {
-		ctx.Json(500, "service error")
+		ctx.Json("service error")
 		return
 	}
 

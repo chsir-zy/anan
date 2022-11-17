@@ -8,7 +8,7 @@ func registerRouter(core *framework.Core) {
 	// core.Get("foo", framework.TimeoutHandler(FooControllerHandler, time.Second*1))
 	// core.Get("foo", FooControllerHandler)
 	// core.Use(middleware.Test1())
-	core.Get("/user", UserControllerHandler)
+	core.Post("/user", UserControllerHandler)
 	core.Get("/info", SubjectSubGetControllerHandler)
 
 	// groupApi := core.Group("/subject")

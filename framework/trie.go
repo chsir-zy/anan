@@ -16,6 +16,8 @@ type node struct {
 	segment  string              //路由规格中某个节点		例如/user/login路由里面的 login
 	handlers []ControllerHandler // 执行业务逻辑的ControllerHandler 和 中间件 ControllerHandler
 	childs   []*node             //子节点
+
+	parent *node //父节点
 }
 
 func newNode() *node {
@@ -134,6 +136,9 @@ func (tree *Tree) AddRouter(uri string, handlers []ControllerHandler) error {
 				newNode.isLast = true
 				newNode.handlers = handlers
 			}
+
+			newNode.parent = n
+
 			n.childs = append(n.childs, newNode)
 			objNode = newNode
 		}
@@ -151,4 +156,24 @@ func (tree *Tree) FindControllerHandler(uri string) []ControllerHandler {
 	}
 
 	return matchNode.handlers
+}
+
+// 最后节点 uri和完整的路由匹配，找出params参数
+// 例如：/user/:id  /user/1  返回map["id"]{1}
+func (n *node) parseParamsFromEndNode(uri string) map[string]string {
+	segments := strings.Split(uri, "/")
+	cur := n
+	ret := make(map[string]string)
+
+	for i := len(segments) - 1; i >= 0; i-- {
+		if cur.segment == "" { //如果到了root节点 跳出循环
+			break
+		}
+		if isWildSegment(cur.segment) { //通配符就赋值  例如：["a"]=1
+			ret[cur.segment[1:]] = segments[i]
+		}
+		cur = cur.parent //查找父级节点
+	}
+
+	return ret
 }

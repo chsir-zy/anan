@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/chsir-zy/anan/framework"
@@ -24,7 +25,7 @@ func FooControllerHandler(c *framework.Context) error {
 		}()
 
 		time.Sleep(2 * time.Second)
-		c.Json(200, "ok")
+		c.SetOkStatus().Json("ok")
 
 		finish <- struct{}{}
 	}()
@@ -34,13 +35,13 @@ func FooControllerHandler(c *framework.Context) error {
 		c.WriterMux().Lock()
 		defer c.WriterMux().Unlock()
 		log.Println(p)
-		c.Json(500, "panic")
+		c.SetStatus(http.StatusInternalServerError).Json("panic")
 	case <-finish:
 		fmt.Println("finish")
 	case <-durationCtx.Done():
 		c.WriterMux().Lock()
 		defer c.WriterMux().Unlock()
-		c.Json(500, "time out")
+		c.SetStatus(http.StatusInternalServerError).Json("time out")
 		c.SetHasTimeOut()
 	}
 
@@ -49,37 +50,38 @@ func FooControllerHandler(c *framework.Context) error {
 
 func UserControllerHandler(c *framework.Context) error {
 	fmt.Println("UserControllerHandler")
-	time.Sleep(5 * time.Second)
-	c.Json(200, "UserControllerHandler")
+	ff, _ := c.FormFile("file")
+	fmt.Println(ff.Filename)
+	c.Json("UserControllerHandler")
 	return nil
 }
 
 func SubjectSubGetControllerHandler(c *framework.Context) error {
 	fmt.Println("SubjectSubGetControllerHandler")
 	time.Sleep(3 * time.Second)
-	c.Json(200, "SubjectSubGetControllerHandler")
+	c.Json("SubjectSubGetControllerHandler")
 	return nil
 }
 
 func SubjectGetControllerHandler(c *framework.Context) error {
-	c.Json(200, "SubjectGetControllerHandler")
+	c.Json("SubjectGetControllerHandler")
 	return nil
 }
 func SubjectPutControllerHandler(c *framework.Context) error {
-	c.Json(200, "SubjectPutControllerHandler")
+	c.Json("SubjectPutControllerHandler")
 	return nil
 }
 func SubjectPostControllerHandler(c *framework.Context) error {
-	c.Json(200, "SubjectPostControllerHandler")
+	c.Json("SubjectPostControllerHandler")
 	c.Next()
 	return nil
 }
 
 func SubjectSubInfoGetControllerHandler(c *framework.Context) error {
-	c.Json(200, "SubjectSubInfoGetControllerHandler")
+	c.Json("SubjectSubInfoGetControllerHandler")
 	return nil
 }
 func SubjectSubInfoSunGetControllerHandler(c *framework.Context) error {
-	c.Json(200, "SubjectSubInfoSunGetControllerHandler")
+	c.Json("SubjectSubInfoSunGetControllerHandler")
 	return nil
 }
