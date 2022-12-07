@@ -1,87 +1,27 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"log"
-	"net/http"
-	"time"
 
-	"github.com/chsir-zy/anan/framework"
+	"github.com/chsir-zy/anan/framework/gin"
+	"github.com/chsir-zy/anan/provider/demo"
 )
 
-func FooControllerHandler(c *framework.Context) error {
-	finish := make(chan struct{}, 1)
-	panicChan := make(chan interface{}, 1)
+func UserControllerHandler(c *gin.Context) {
+	fmt.Println("UserControllerHandler1")
+	// ff, _ := c.FormFile("file")
+	// fmt.Println(ff.Filename)
 
-	durationCtx, cancel := context.WithTimeout(c.BaseContext(), time.Duration(2*time.Second))
-	defer cancel()
-
-	go func() {
-		defer func() {
-			if p := recover(); p != nil {
-				panicChan <- p
-			}
-		}()
-
-		time.Sleep(2 * time.Second)
-		c.SetOkStatus().Json("ok")
-
-		finish <- struct{}{}
-	}()
-
-	select {
-	case p := <-panicChan:
-		c.WriterMux().Lock()
-		defer c.WriterMux().Unlock()
-		log.Println(p)
-		c.SetStatus(http.StatusInternalServerError).Json("panic")
-	case <-finish:
-		fmt.Println("finish")
-	case <-durationCtx.Done():
-		c.WriterMux().Lock()
-		defer c.WriterMux().Unlock()
-		c.SetStatus(http.StatusInternalServerError).Json("time out")
-		c.SetHasTimeOut()
-	}
-
-	return nil
+	// time.Sleep(10 * time.Second)
+	c.ISetOkStatus()
+	c.IJson("ok,UserControllerHandler")
+	c.IJsonp("abc")
 }
 
-func UserControllerHandler(c *framework.Context) error {
-	fmt.Println("UserControllerHandler")
-	ff, _ := c.FormFile("file")
-	fmt.Println(ff.Filename)
-	c.Json("UserControllerHandler")
-	return nil
-}
+func SubjectListController(c *gin.Context) {
+	demoService := c.MustMake(demo.Key).(demo.Service)
+	fmt.Println(demoService)
+	foo := demoService.GetFoo()
 
-func SubjectSubGetControllerHandler(c *framework.Context) error {
-	fmt.Println("SubjectSubGetControllerHandler")
-	time.Sleep(3 * time.Second)
-	c.Json("SubjectSubGetControllerHandler")
-	return nil
-}
-
-func SubjectGetControllerHandler(c *framework.Context) error {
-	c.Json("SubjectGetControllerHandler")
-	return nil
-}
-func SubjectPutControllerHandler(c *framework.Context) error {
-	c.Json("SubjectPutControllerHandler")
-	return nil
-}
-func SubjectPostControllerHandler(c *framework.Context) error {
-	c.Json("SubjectPostControllerHandler")
-	c.Next()
-	return nil
-}
-
-func SubjectSubInfoGetControllerHandler(c *framework.Context) error {
-	c.Json("SubjectSubInfoGetControllerHandler")
-	return nil
-}
-func SubjectSubInfoSunGetControllerHandler(c *framework.Context) error {
-	c.Json("SubjectSubInfoSunGetControllerHandler")
-	return nil
+	c.ISetOkStatus().IJson(foo)
 }

@@ -3,13 +3,15 @@ package main
 import (
 	"net/http"
 
-	"github.com/chsir-zy/anan/framework"
-	"github.com/chsir-zy/anan/framework/middleware"
+	"github.com/chsir-zy/anan/framework/gin"
+	"github.com/chsir-zy/anan/provider/demo"
 )
 
 func main() {
-	core := framework.NewCore()
-	core.Use(middleware.Recovery(), middleware.Cost())
+	core := gin.New()
+	core.Bind(&demo.DemoServiceProvider{})
+
+	// core.Use(middleware.Recovery(), middleware.Cost())
 	registerRouter(core)
 
 	server := &http.Server{
@@ -18,8 +20,19 @@ func main() {
 	}
 	server.ListenAndServe()
 
-	// a := []int{1, 2, 3}
-	// b := append(a, 4)
-	// fmt.Println(a, b)
+	/* go func() {
+		server.ListenAndServe()
+	}()
+
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGKILL, syscall.SIGTERM)
+	<-quit
+
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	if err := server.Shutdown(ctx); err != nil {
+		fmt.Println(123)
+		log.Fatal("all goroutine is over ", err)
+
+	} */
 
 }
