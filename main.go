@@ -3,16 +3,18 @@ package main
 import (
 	"net/http"
 
+	appHttp "github.com/chsir-zy/anan/app/http"
+	"github.com/chsir-zy/anan/app/provider/demo"
 	"github.com/chsir-zy/anan/framework/gin"
-	"github.com/chsir-zy/anan/provider/demo"
 )
 
 func main() {
 	core := gin.New()
-	core.Bind(&demo.DemoServiceProvider{})
+	// core.Bind(&app.AnanAppProvider{})
+	core.Bind(&demo.DemoProvider{})
 
 	// core.Use(middleware.Recovery(), middleware.Cost())
-	registerRouter(core)
+	appHttp.Routes(core)
 
 	server := &http.Server{
 		Handler: core,

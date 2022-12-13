@@ -155,7 +155,7 @@ func (container *AnanContainer) make(key string, params []interface{}, forceNew 
 		return ins, nil
 	}
 
-	inst, err := container.newInstance(sp, params)
+	inst, err := container.newInstance(sp, nil)
 	if err != nil {
 		return nil, err
 	}
