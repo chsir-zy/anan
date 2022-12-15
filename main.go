@@ -1,26 +1,38 @@
 package main
 
 import (
-	"net/http"
-
+	"github.com/chsir-zy/anan/app/console"
 	appHttp "github.com/chsir-zy/anan/app/http"
 	"github.com/chsir-zy/anan/app/provider/demo"
-	"github.com/chsir-zy/anan/framework/gin"
+	"github.com/chsir-zy/anan/framework"
+	"github.com/chsir-zy/anan/framework/provider/app"
+	"github.com/chsir-zy/anan/framework/provider/kernel"
 )
 
 func main() {
-	core := gin.New()
+	// 初始化服务容器
+	container := framework.NewAnanContainer()
+	container.Bind(&app.AnanAppProvider{})
+	container.Bind(&demo.DemoProvider{})
+
+	if engine, err := appHttp.NewHttpEngine(); err == nil {
+		container.Bind(&kernel.AnanKernelProvider{HttpEngine: engine})
+	}
+
+	console.RunCommand(container)
+
+	// core := gin.New()
 	// core.Bind(&app.AnanAppProvider{})
-	core.Bind(&demo.DemoProvider{})
+	// core.Bind(&demo.DemoProvider{})
 
 	// core.Use(middleware.Recovery(), middleware.Cost())
-	appHttp.Routes(core)
+	// appHttp.Routes(core)
 
-	server := &http.Server{
-		Handler: core,
-		Addr:    ":8888",
-	}
-	server.ListenAndServe()
+	// server := &http.Server{
+	// 	Handler: core,
+	// 	Addr:    ":8888",
+	// }
+	// server.ListenAndServe()
 
 	/* go func() {
 		server.ListenAndServe()
