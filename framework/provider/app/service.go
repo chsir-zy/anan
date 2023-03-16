@@ -2,16 +2,18 @@ package app
 
 import (
 	"errors"
-	"flag"
 	"path/filepath"
 
 	"github.com/chsir-zy/anan/framework"
 	"github.com/chsir-zy/anan/framework/util"
+	"github.com/google/uuid"
 )
 
 type AnanApp struct {
 	container  framework.Container
 	baseFolder string
+
+	appId string // 表示当前这个app的唯一id  可以用于分布式锁
 }
 
 func (a AnanApp) Version() string {
@@ -19,16 +21,16 @@ func (a AnanApp) Version() string {
 }
 
 func (a AnanApp) BaseFolder() string {
+	// if a.baseFolder != "" {
+	// 	return a.baseFolder
+	// }
+
+	// var baseFolder string
+	// flag.StringVar(&baseFolder, "base_folder", "", "base_folder参数为当前默认路劲")
+	// flag.Parse()
+
 	if a.baseFolder != "" {
 		return a.baseFolder
-	}
-
-	var baseFolder string
-	flag.StringVar(&baseFolder, "base_folder", "", "base_folder参数为当前默认路劲")
-	flag.Parse()
-
-	if baseFolder != "" {
-		return baseFolder
 	}
 
 	return util.GetExecDirectory()
@@ -73,5 +75,10 @@ func NewAnanApp(params ...interface{}) (interface{}, error) {
 	container := params[0].(framework.Container)
 	baseFolder := params[1].(string)
 
-	return &AnanApp{baseFolder: baseFolder, container: container}, nil
+	appId := uuid.New().String()
+	return &AnanApp{baseFolder: baseFolder, container: container, appId: appId}, nil
+}
+
+func (a AnanApp) AppID() string {
+	return a.appId
 }

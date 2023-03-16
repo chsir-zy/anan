@@ -26,6 +26,8 @@ import (
 	"strings"
 
 	"github.com/chsir-zy/anan/framework"
+	"github.com/robfig/cron/v3"
+
 	flag "github.com/spf13/pflag"
 )
 
@@ -37,6 +39,9 @@ type FParseErrWhitelist flag.ParseErrorsWhitelist
 // you to define the usage and description as part of your command
 // definition to ensure usability.
 type Command struct {
+	Cron      *cron.Cron
+	CronSpecs []CronSpec
+
 	container framework.Container
 
 	// Use is the one-line usage message.

@@ -1,6 +1,8 @@
 package console
 
 import (
+	"time"
+
 	"github.com/chsir-zy/anan/app/console/command/demo"
 	"github.com/chsir-zy/anan/framework"
 	"github.com/chsir-zy/anan/framework/cobra"
@@ -32,5 +34,9 @@ func RunCommand(container framework.Container) error {
 
 // 绑定业务命令
 func AddAppCommand(rootCmd *cobra.Command) {
-	rootCmd.AddCommand(demo.InitFoo())
+	// rootCmd.AddCommand(demo.InitFoo())
+	// rootCmd.AddCommand(demo.FooCommand)
+	// rootCmd.AddCronCommand("* * * * * *", demo.FooCommand)
+
+	rootCmd.AddDistributedCronCommand("foo_func_for_test", "*/5 * * * * *", demo.FooCommand, 2*time.Second)
 }

@@ -4,6 +4,9 @@ package contract
 const AppKey = "anan:app"
 
 type App interface {
+	// 表示当前这个app唯一的id
+	AppID() string
+
 	// 当前版本
 	Version() string
 
@@ -27,4 +30,7 @@ type App interface {
 	RuntimeFolder() string
 
 	TestFolder() string
+
+	// LoadAppConfig 加载新的AppConfig，key为对应的函数转为小写下划线，比如ConfigFolder => config_folder
+	// LoadAppConfig(kv map[string]string)
 }

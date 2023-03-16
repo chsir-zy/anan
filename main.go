@@ -6,6 +6,7 @@ import (
 	"github.com/chsir-zy/anan/app/provider/demo"
 	"github.com/chsir-zy/anan/framework"
 	"github.com/chsir-zy/anan/framework/provider/app"
+	"github.com/chsir-zy/anan/framework/provider/distributed"
 	"github.com/chsir-zy/anan/framework/provider/kernel"
 )
 
@@ -14,6 +15,8 @@ func main() {
 	container := framework.NewAnanContainer()
 	container.Bind(&app.AnanAppProvider{})
 	container.Bind(&demo.DemoProvider{})
+
+	container.Bind(&distributed.LocalDistributedProvider{})
 
 	if engine, err := appHttp.NewHttpEngine(); err == nil {
 		container.Bind(&kernel.AnanKernelProvider{HttpEngine: engine})
