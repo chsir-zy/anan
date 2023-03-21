@@ -2,11 +2,13 @@ package main
 
 import (
 	"github.com/chsir-zy/anan/app/console"
-	appHttp "github.com/chsir-zy/anan/app/http"
+	"github.com/chsir-zy/anan/app/http"
 	"github.com/chsir-zy/anan/app/provider/demo"
 	"github.com/chsir-zy/anan/framework"
 	"github.com/chsir-zy/anan/framework/provider/app"
+	"github.com/chsir-zy/anan/framework/provider/config"
 	"github.com/chsir-zy/anan/framework/provider/distributed"
+	"github.com/chsir-zy/anan/framework/provider/env"
 	"github.com/chsir-zy/anan/framework/provider/kernel"
 )
 
@@ -15,41 +17,26 @@ func main() {
 	container := framework.NewAnanContainer()
 	container.Bind(&app.AnanAppProvider{})
 	container.Bind(&demo.DemoProvider{})
+	container.Bind(&env.AnanEnvProvider{})
 
 	container.Bind(&distributed.LocalDistributedProvider{})
+	container.Bind(&config.AnanConfigProvider{})
 
-	if engine, err := appHttp.NewHttpEngine(); err == nil {
+	if engine, err := http.NewHttpEngine(); err == nil {
 		container.Bind(&kernel.AnanKernelProvider{HttpEngine: engine})
 	}
 
 	console.RunCommand(container)
 
-	// core := gin.New()
-	// core.Bind(&app.AnanAppProvider{})
-	// core.Bind(&demo.DemoProvider{})
+	/* var a interface{}
+	var f = make(map[int]interface{}, 0)
+	f[123] = "123"
 
-	// core.Use(middleware.Recovery(), middleware.Cost())
-	// appHttp.Routes(core)
-
-	// server := &http.Server{
-	// 	Handler: core,
-	// 	Addr:    ":8888",
-	// }
-	// server.ListenAndServe()
-
-	/* go func() {
-		server.ListenAndServe()
-	}()
-
-	quit := make(chan os.Signal)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGKILL, syscall.SIGTERM)
-	<-quit
-
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
-	if err := server.Shutdown(ctx); err != nil {
+	a = f
+	switch a.(type) {
+	case map[interface{}]interface{}:
 		fmt.Println(123)
-		log.Fatal("all goroutine is over ", err)
-
+	default:
+		fmt.Println(456)
 	} */
-
 }

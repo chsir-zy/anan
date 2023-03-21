@@ -1,8 +1,6 @@
 package demo
 
 import (
-	"net/http"
-
 	"github.com/chsir-zy/anan/app/provider/demo"
 	"github.com/chsir-zy/anan/framework/contract"
 	"github.com/chsir-zy/anan/framework/gin"
@@ -29,10 +27,17 @@ func NewDemoApi() *DemoApi {
 }
 
 func (api *DemoApi) Demo(c *gin.Context) {
-	appService := c.MustMake(contract.AppKey).(contract.App)
-	baseFolder := appService.BaseFolder()
+	// appService := c.MustMake(contract.AppKey).(contract.App)
+	// baseFolder := appService.BaseFolder()
 
-	c.JSON(http.StatusOK, baseFolder)
+	// c.JSON(http.StatusOK, baseFolder)
+
+	// 获取password
+	configService := c.MustMake(contract.ConfigKey).(contract.Config)
+	password := configService.GetString("database.mysql.password")
+	// 打印出来
+	c.JSON(200, password)
+
 }
 
 func (api *DemoApi) Demo2(c *gin.Context) {
