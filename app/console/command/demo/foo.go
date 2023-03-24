@@ -3,6 +3,7 @@ package demo
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/chsir-zy/anan/framework/cobra"
 	"github.com/chsir-zy/anan/framework/contract"
@@ -10,8 +11,11 @@ import (
 
 func InitFoo() *cobra.Command {
 	// FooCommand.AddCommand(Foo1Command)
-	FooCommand.AddCommand(envCommand)
-	return FooCommand
+	// FooCommand.AddCommand(envCommand)
+	// return FooCommand
+
+	ConfigCommand.AddCommand(getConfigCommand)
+	return ConfigCommand
 }
 
 var FooCommand = &cobra.Command{
@@ -50,5 +54,31 @@ var envCommand = &cobra.Command{
 		envService := container.MustMake(contract.EnvKey).(contract.Env)
 		// 打印环境
 		fmt.Println("environment:", envService.AppEnv())
+	},
+}
+
+var ConfigCommand = &cobra.Command{
+	Use:   "config",
+	Short: "获取配置文件",
+	Long:  "获取配置文件",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		log.Println("execute config command")
+		return nil
+	},
+}
+
+var getConfigCommand = &cobra.Command{
+	Use:   "get",
+	Short: "获取某个配置文件",
+	Long:  "获取某个配置文件",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		params := os.Args[3]
+		c := cmd.GetContainer()
+		log.Println(params)
+
+		conf := c.MustMake(contract.ConfigKey).(contract.Config)
+		p := conf.GetString(params)
+		log.Println(p)
+		return nil
 	},
 }
