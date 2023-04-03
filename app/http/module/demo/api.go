@@ -1,7 +1,10 @@
 package demo
 
 import (
+	"fmt"
+
 	"github.com/chsir-zy/anan/app/provider/demo"
+	"github.com/chsir-zy/anan/app/provider/user"
 	"github.com/chsir-zy/anan/framework/contract"
 	"github.com/chsir-zy/anan/framework/gin"
 )
@@ -41,11 +44,16 @@ func (api *DemoApi) Demo(c *gin.Context) {
 }
 
 func (api *DemoApi) Demo2(c *gin.Context) {
-	demoProvider := c.MustMake(demo.DemoKey).(demo.IService)
-	students := demoProvider.GetAllStudent()
-	userDTO := StudentToUserDTOs(students)
+	testService := c.MustMake(user.UserKey).(user.Service)
+	foo := testService.Foo()
+	fmt.Println(foo)
+	c.JSON(200, foo)
 
-	c.JSON(200, userDTO)
+	// demoProvider := c.MustMake(demo.DemoKey).(demo.IService)
+	// students := demoProvider.GetAllStudent()
+	// userDTO := StudentToUserDTOs(students)
+
+	// c.JSON(200, userDTO)
 }
 
 // func (api *DemoApi) DemoPost(c *gin.Context) {

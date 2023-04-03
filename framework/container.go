@@ -163,3 +163,14 @@ func (container *AnanContainer) make(key string, params []interface{}, forceNew 
 	container.instances[key] = inst
 	return inst, nil
 }
+
+// 返回所有服务的名字
+func (container *AnanContainer) NameList() []string {
+	var ret = []string{}
+	for _, provider := range container.providers {
+		name := provider.Name()
+		ret = append(ret, name)
+	}
+
+	return ret
+}

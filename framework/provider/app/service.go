@@ -69,7 +69,7 @@ func (a AnanApp) ProviderFolder() string {
 	if val, ok := a.configMap["provider_folder"]; ok {
 		return val
 	}
-	return filepath.Join(a.BaseFolder(), "provider")
+	return filepath.Join(a.BaseFolder(), "app", "provider")
 }
 
 func (a AnanApp) MiddlewareFolder() string {

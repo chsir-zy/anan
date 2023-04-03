@@ -4,6 +4,7 @@ import (
 	"github.com/chsir-zy/anan/app/console"
 	"github.com/chsir-zy/anan/app/http"
 	"github.com/chsir-zy/anan/app/provider/demo"
+	"github.com/chsir-zy/anan/app/provider/user"
 	"github.com/chsir-zy/anan/framework"
 	"github.com/chsir-zy/anan/framework/provider/app"
 	"github.com/chsir-zy/anan/framework/provider/config"
@@ -17,6 +18,7 @@ func main() {
 	container := framework.NewAnanContainer()
 	container.Bind(&app.AnanAppProvider{})
 	container.Bind(&demo.DemoProvider{})
+	container.Bind(&user.UserProvider{})
 	container.Bind(&env.AnanEnvProvider{})
 
 	container.Bind(&distributed.LocalDistributedProvider{})
