@@ -122,3 +122,10 @@ func (app *AnanApp) LoadAppConfig(kv map[string]string) {
 		app.configMap[key] = val
 	}
 }
+
+func (a AnanApp) AppFolder() string {
+	if val, ok := a.configMap["app_folder"]; ok {
+		return val
+	}
+	return filepath.Join(a.BaseFolder(), "app")
+}
