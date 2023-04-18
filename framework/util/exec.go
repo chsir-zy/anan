@@ -5,6 +5,7 @@ import (
 	"syscall"
 )
 
+//获取当前程序执行所在的目录
 func GetExecDirectory() string {
 	file, err := os.Getwd()
 	if err == nil {

@@ -1,10 +1,7 @@
 package demo
 
 import (
-	"fmt"
-
 	"github.com/chsir-zy/anan/app/provider/demo"
-	"github.com/chsir-zy/anan/app/provider/user"
 	"github.com/chsir-zy/anan/framework/contract"
 	"github.com/chsir-zy/anan/framework/gin"
 )
@@ -29,6 +26,13 @@ func NewDemoApi() *DemoApi {
 	}
 }
 
+// Demo godoc
+// @Summary 获取所有用户
+// @tag.description.markdown demo.md
+// @Produce  json
+// @Tags demo
+// @Success 200
+// @Router /demo/demo [get]
 func (api *DemoApi) Demo(c *gin.Context) {
 	// appService := c.MustMake(contract.AppKey).(contract.App)
 	// baseFolder := appService.BaseFolder()
@@ -43,33 +47,30 @@ func (api *DemoApi) Demo(c *gin.Context) {
 
 }
 
+// Demo2  for godoc
+// @Summary 获取所有学生
+// @Description 获取所有学生,不进行分页
+// @Produce  json
+// @Tags demo
+// @Success 200
+// @Router /demo/demo2 [get]
 func (api *DemoApi) Demo2(c *gin.Context) {
-	testService := c.MustMake(user.UserKey).(user.Service)
-	foo := testService.Foo()
-	fmt.Println(foo)
-	c.JSON(200, foo)
+	// testService := c.MustMake(user.UserKey).(user.Service)
+	// foo := testService.Foo()
+	// fmt.Println(foo)
+	// c.JSON(200, foo)
 
-	// demoProvider := c.MustMake(demo.DemoKey).(demo.IService)
-	// students := demoProvider.GetAllStudent()
-	// userDTO := StudentToUserDTOs(students)
+	demoProvider := c.MustMake(demo.DemoKey).(demo.IService)
+	students := demoProvider.GetAllStudent()
+	userDTO := StudentToUserDTOs(students)
 
-	// c.JSON(200, userDTO)
+	c.JSON(200, userDTO)
 }
 
-// func (api *DemoApi) DemoPost(c *gin.Context) {
-// 	type Foo struct {
-// 		Name string
-// 	}
-
-// 	foo := &Foo{}
-// 	err := c.BindJSON(&foo)
-// 	fmt.Println(err)
-// 	if err != nil {
-// 		c.AbortWithError(500, err)
-// 	}
-
-// 	c.JSON(200, nil)
-// }
+type DTO struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
 
 func (api *DemoApi) DemoPost(c *gin.Context) {
 	type Foo struct {
