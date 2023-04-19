@@ -17,8 +17,11 @@ import (
 	"github.com/chsir-zy/anan/framework/contract"
 	"github.com/chsir-zy/anan/framework/util"
 	"github.com/erikdubbelboer/gspt"
+	"github.com/pkg/errors"
 	"github.com/sevlyar/go-daemon"
 )
+
+const CLOST_WAIT = 5
 
 var appAddress = ""   //app启动地址
 var appDaemon = false //是否以daemond的方式启动
@@ -27,6 +30,9 @@ func initAppCommand() *cobra.Command {
 	appStartCommand.Flags().BoolVarP(&appDaemon, "daemon", "d", false, "start app daemon")
 	appStartCommand.Flags().StringVar(&appAddress, "address", "", "设置app启动的地址，默认是:8888")
 	appCommand.AddCommand(appStartCommand)
+	appCommand.AddCommand(appStateCommand)
+	appCommand.AddCommand(appStopCommand)
+	appCommand.AddCommand(appRestartCommand)
 	return appCommand
 }
 
@@ -52,7 +58,7 @@ func startAppServe(server *http.Server, c framework.Container) error {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	<-quit
 
-	closeWait := 5
+	closeWait := CLOST_WAIT
 	configService := c.MustMake(contract.ConfigKey).(contract.Config)
 	if configService.IsExist("app.close_wait") {
 		closeWait = configService.GetInt("app.close_wait")
@@ -162,5 +168,144 @@ var appStartCommand = &cobra.Command{
 		}
 
 		return nil
+	},
+}
+
+var appStateCommand = &cobra.Command{
+	Use:   "state",
+	Short: "查看app的运行状态",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		container := cmd.GetContainer()
+		appService := container.MustMake(contract.AppKey).(contract.App)
+		serverFolder := appService.RuntimeFolder()
+		serverFolderFile := filepath.Join(serverFolder, "app.pid")
+		strPid, err := ioutil.ReadFile(serverFolderFile)
+		if err != nil {
+			fmt.Println("app进程没有运行")
+			return err
+		}
+
+		// 判断进程文件里面是否有数据
+		if strPid == nil || len(strPid) == 0 {
+			fmt.Println("app进程没有运行")
+			return err
+		}
+
+		pid, err := strconv.Atoi(string(strPid))
+		if err != nil {
+			fmt.Println("app进程没有运行")
+			return err
+		}
+		isExist := util.CheckProcessExist(pid)
+		if !isExist {
+			fmt.Println("app进程没有运行")
+			return err
+		}
+
+		fmt.Println("app进程正在运行，进程号PID: ", pid)
+		return nil
+	},
+}
+
+var appStopCommand = &cobra.Command{
+	Use:   "stop",
+	Short: "停止运行app进程",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		container := cmd.GetContainer()
+		appService := container.MustMake(contract.AppKey).(contract.App)
+
+		serverFolderFile := filepath.Join(appService.RuntimeFolder(), "app.pid")
+		strPid, err := ioutil.ReadFile(serverFolderFile)
+		if err != nil {
+			fmt.Println("app进程没有运行")
+			return err
+		}
+
+		// 判断进程文件里面是否有数据
+		if strPid == nil || len(strPid) == 0 {
+			fmt.Println("app进程没有运行")
+			return err
+		}
+
+		pid, err := strconv.Atoi(string(strPid))
+		if err != nil {
+			fmt.Println("app进程没有运行")
+			return err
+		}
+		isExist := util.CheckProcessExist(pid)
+		if !isExist {
+			fmt.Println("app进程没有运行")
+			return err
+		}
+
+		if err := syscall.Kill(pid, syscall.SIGTERM); err != nil {
+			return nil
+		}
+
+		if err := ioutil.WriteFile(serverFolderFile, []byte{}, 0664); err != nil {
+			return nil
+		}
+
+		fmt.Println("app进程停止运行，进程号PID: ", pid)
+		return nil
+	},
+}
+
+var appRestartCommand = &cobra.Command{
+	Use:   "restart",
+	Short: "重新启动app进程",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		container := cmd.GetContainer()
+		appService := container.MustMake(contract.AppKey).(contract.App)
+
+		serverFolderFile := filepath.Join(appService.RuntimeFolder(), "app.pid")
+		strPid, err := ioutil.ReadFile(serverFolderFile)
+		if err != nil {
+			fmt.Println("app进程没有运行")
+			return err
+		}
+
+		// 判断进程文件里面是否有数据
+		if strPid != nil || len(strPid) != 0 {
+			pid, err := strconv.Atoi(string(strPid))
+			if err != nil {
+				fmt.Println("app进程没有运行")
+				return err
+			}
+			if util.CheckProcessExist(pid) { //检测到进程正在运行
+				if err := syscall.Kill(pid, syscall.SIGTERM); err != nil {
+					return nil
+				}
+
+				// 等待两个closeWait的时间让原来的进程先介绍
+				closeWait := CLOST_WAIT * 2
+				configService := container.MustMake(contract.ConfigKey).(contract.Config)
+				if configService.IsExist("app.close_wait") {
+					closeWait = configService.GetInt("app.close_wait")
+				}
+
+				for i := 0; i < closeWait; i++ {
+					if !util.CheckProcessExist(pid) { //如果进程结束了则跳出循环
+						break
+					}
+					time.Sleep(time.Second * 1)
+				}
+
+				// 循环结束后进程还未结束 则返回
+				if util.CheckProcessExist(pid) {
+					fmt.Println("结束进程失败, Pid:", pid)
+					return errors.New("结束进程失败")
+				}
+
+				if err := ioutil.WriteFile(serverFolderFile, []byte{}, 0664); err != nil {
+					return nil
+				}
+				fmt.Println("结束进程成功，PID:", pid)
+			}
+		}
+
+		//以daemon的方式启动新进程
+		appDaemon = true
+		return appStartCommand.RunE(cmd, args)
 	},
 }
