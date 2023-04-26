@@ -11,6 +11,8 @@ import (
 	"github.com/chsir-zy/anan/framework/provider/distributed"
 	"github.com/chsir-zy/anan/framework/provider/env"
 	"github.com/chsir-zy/anan/framework/provider/kernel"
+	"github.com/chsir-zy/anan/framework/provider/log"
+	"github.com/chsir-zy/anan/framework/provider/orm"
 )
 
 func main() {
@@ -23,6 +25,8 @@ func main() {
 
 	container.Bind(&distributed.LocalDistributedProvider{})
 	container.Bind(&config.AnanConfigProvider{})
+	container.Bind(&orm.GormProvider{})
+	container.Bind(&log.AnanLogServiceProvider{})
 
 	if engine, err := http.NewHttpEngine(); err == nil {
 		container.Bind(&kernel.AnanKernelProvider{HttpEngine: engine})

@@ -14,6 +14,7 @@ func Register(r *gin.Engine) error {
 	api := NewDemoApi()
 	r.Bind(&demo.DemoProvider{})
 	r.GET("/demo/demo", api.Demo)
+	r.GET("/demo/orm", api.DemoOrm)
 	r.GET("/demo/demo2", api.Demo2)
 	r.POST("/demo/demo_post", api.DemoPost)
 	return nil

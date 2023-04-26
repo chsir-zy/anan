@@ -54,8 +54,8 @@ func (lp *AnanLogServiceProvider) Boot(c framework.Container) error {
 	return nil
 }
 
-func (lp *AnanLogServiceProvider) IsDefer() error {
-	return nil
+func (lp *AnanLogServiceProvider) IsDefer() bool {
+	return false
 }
 
 func (lp *AnanLogServiceProvider) Params(c framework.Container) []interface{} {
