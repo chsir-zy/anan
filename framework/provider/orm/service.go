@@ -72,8 +72,8 @@ func (a *AnanGorm) GetDB(option ...contract.DBoption) (*gorm.DB, error) {
 	a.lock.RUnlock()
 
 	// 没有实例化 *gorm.DB
-	a.lock.RLock()
-	defer a.lock.RLocker()
+	a.lock.Lock()
+	defer a.lock.Unlock()
 
 	var db *gorm.DB
 	var err error

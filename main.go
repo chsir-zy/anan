@@ -34,15 +34,12 @@ func main() {
 
 	console.RunCommand(container)
 
-	/* var a interface{}
-	var f = make(map[int]interface{}, 0)
-	f[123] = "123"
-
-	a = f
-	switch a.(type) {
-	case map[interface{}]interface{}:
-		fmt.Println(123)
-	default:
-		fmt.Println(456)
-	} */
 }
+
+// func NewClient() {
+// 	var ctx = context.Background()
+// 	redis.NewClient(&redis.Options{
+// 		Addr: "localhost:6739",
+// 	})
+
+// }
